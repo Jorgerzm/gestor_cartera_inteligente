@@ -1,0 +1,43 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend/public:/var/www/public
+      - ../backend/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - db
+  php:
+    build:
+      context: ../backend
+      target: php
+    volumes:
+      - ../backend:/var/www
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=cartera
+      - DB_USERNAME=cartera
+      - DB_PASSWORD=cartera
+    depends_on:
+      - db
+  frontend:
+    build: ../frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nginx
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: cartera
+      MYSQL_USER: cartera
+      MYSQL_PASSWORD: cartera
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
